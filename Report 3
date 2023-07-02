@@ -1,0 +1,24 @@
+from config import open_weather_token
+import requests
+from datetime import datetime
+import telebot
+
+bot = telebot.TeleBot('6082532817:AAGcjV5Uuf2Ar1bth3HOqUuu1xYxFYIFqrg')
+@bot.message_handler(commands=['weather'])
+def start(city):
+    city_name = city.text.replace("/weather", "").strip()
+    bot.send_message(city.chat.id, f'Hi! This is a reminder bot. Use /set_reminder to set a reminder.')
+    bot.send_message(city.chat.id, {city_name})
+    r = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={open_weather_token}&units=metric")
+    data = r.json()
+    temperature = data["main"]['temp']
+    humidity = data["main"]['humidity']
+    pressure = data["main"]['pressure']
+    wind = data["wind"]['speed']
+    sunrise_timestamp = datetime.fromtimestamp(data['sys']['sunrise'])
+    sunset_timestamp = datetime.fromtimestamp(data['sys']['sunset'])
+    bot.send_message(city.chat.id, f'Temperature: {temperature}\nPressure: {pressure}')
+    length_of_the_day = sunset_timestamp - sunrise_timestamp
+    #bot.send_message(city.chat.id, 'Hi')
+
+bot.polling(none_stop=True)
